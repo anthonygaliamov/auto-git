@@ -9,7 +9,7 @@ import { isEnabledFor, readSettings } from './settings';
 
 /**
  * Works out which repositories should be synced, and opens them in the Git extension.
- * Candidates are repos found in the workspace folders plus anything in `autoGit.includeRepos`.
+ * Candidates are repos found in the workspace folders plus anything in `autoSync.includeRepos`.
  */
 export class RepoDiscovery implements vscode.Disposable {
   private readonly disposables: vscode.Disposable[] = [];
@@ -29,7 +29,7 @@ export class RepoDiscovery implements vscode.Disposable {
       this.changed,
       vscode.workspace.onDidChangeWorkspaceFolders(() => void this.refresh()),
       vscode.workspace.onDidChangeConfiguration((e) => {
-        if (e.affectsConfiguration('autoGit')) {
+        if (e.affectsConfiguration('autoSync')) {
           void this.refresh();
         }
       }),
@@ -65,7 +65,7 @@ export class RepoDiscovery implements vscode.Disposable {
   private async scan(): Promise<void> {
     const settings = readSettings();
     for (const entry of [...invalidEntries(settings.include), ...invalidEntries(settings.exclude)]) {
-      this.log.info(`Ignoring "${entry}" in autoGit settings: repository paths must be absolute.`);
+      this.log.info(`Ignoring "${entry}" in autoSync settings: repository paths must be absolute.`);
     }
 
     const candidates = new Map<string, string>();

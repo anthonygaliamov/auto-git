@@ -10,14 +10,14 @@ import { SyncService } from './syncService';
 import { RepoSyncer } from './syncRepo';
 
 /** Exposed so integration tests can inspect state. Not a public API. */
-export interface AutoGitExports {
+export interface AutoSyncExports {
   /** Resolves once the first repository scan has finished. */
   ready: Promise<Services | undefined>;
 }
 
 const STARTUP_DELAY_MS = 5000;
 
-export function activate(context: vscode.ExtensionContext): AutoGitExports {
+export function activate(context: vscode.ExtensionContext): AutoSyncExports {
   const log = new Logger();
   context.subscriptions.push(log);
 
@@ -25,9 +25,9 @@ export function activate(context: vscode.ExtensionContext): AutoGitExports {
   ready.catch((err) => log.info(`Startup failed: ${err instanceof Error ? err.message : String(err)}`));
 
   context.subscriptions.push(
-    registerCommands(ready, log, (paused) => void vscode.commands.executeCommand('setContext', 'autoGit.paused', paused)),
+    registerCommands(ready, log, (paused) => void vscode.commands.executeCommand('setContext', 'autoSync.paused', paused)),
   );
-  void vscode.commands.executeCommand('setContext', 'autoGit.paused', false);
+  void vscode.commands.executeCommand('setContext', 'autoSync.paused', false);
 
   return { ready };
 }
@@ -58,7 +58,7 @@ async function start(context: vscode.ExtensionContext, log: Logger): Promise<Ser
       }
     }),
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration('autoGit.intervalMinutes')) {
+      if (e.affectsConfiguration('autoSync.intervalMinutes')) {
         scheduler.reschedule();
       }
     }),
@@ -67,7 +67,7 @@ async function start(context: vscode.ExtensionContext, log: Logger): Promise<Ser
   await discovery.refresh();
   const { syncOnStartup, intervalMinutes } = readSettings();
   scheduler.start(syncOnStartup ? STARTUP_DELAY_MS : intervalMinutes * 60_000);
-  log.info(`Auto Git started. Syncing every ${intervalMinutes} minute${intervalMinutes === 1 ? '' : 's'}.`);
+  log.info(`Auto Sync started. Syncing every ${intervalMinutes} minute${intervalMinutes === 1 ? '' : 's'}.`);
 
   return { discovery, service, scheduler, status };
 }

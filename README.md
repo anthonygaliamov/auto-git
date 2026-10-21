@@ -21,25 +21,25 @@ Pulls are done by fast-forwarding to the branch that was just fetched, and only 
 
 | Command | What it does |
 | --- | --- |
-| `Auto Git: Sync All Repositories Now` | Syncs every tracked repo immediately, even while paused |
-| `Auto Git: Sync This Repository` | Syncs the repo of the active file, or asks which one |
-| `Auto Git: Pause` | Stops automatic syncing |
-| `Auto Git: Resume` | Starts it again and syncs straight away |
-| `Auto Git: Show Issues` | Lists repos that need attention |
-| `Auto Git: Show Log` | Opens the output channel |
+| `Auto Sync: Sync All Repositories Now` | Syncs every tracked repo immediately, even while paused |
+| `Auto Sync: Sync This Repository` | Syncs the repo of the active file, or asks which one |
+| `Auto Sync: Pause` | Stops automatic syncing |
+| `Auto Sync: Resume` | Starts it again and syncs straight away |
+| `Auto Sync: Show Issues` | Lists repos that need attention |
+| `Auto Sync: Show Log` | Opens the output channel |
 
 ## Settings
 
 | Setting | Default | Description |
 | --- | --- | --- |
-| `autoGit.enabled` | `true` | Turn syncing on or off. Can be set per repo folder |
-| `autoGit.intervalMinutes` | `5` | Minutes between syncs |
-| `autoGit.scanDepth` | `3` | How deep to look for nested repos in workspace folders |
-| `autoGit.includeRepos` | `[]` | If not empty, only these repo paths are synced |
-| `autoGit.excludeRepos` | `[]` | Repo paths that are never synced |
-| `autoGit.syncOnStartup` | `true` | Sync shortly after VS Code starts |
-| `autoGit.syncOnFocus` | `true` | Sync when the window regains focus |
-| `autoGit.notifications` | `true` | Show notifications for problems |
+| `autoSync.enabled` | `true` | Turn syncing on or off. Can be set per repo folder |
+| `autoSync.intervalMinutes` | `5` | Minutes between syncs |
+| `autoSync.scanDepth` | `3` | How deep to look for nested repos in workspace folders |
+| `autoSync.includeRepos` | `[]` | If not empty, only these repo paths are synced |
+| `autoSync.excludeRepos` | `[]` | Repo paths that are never synced |
+| `autoSync.syncOnStartup` | `true` | Sync shortly after VS Code starts |
+| `autoSync.syncOnFocus` | `true` | Sync when the window regains focus |
+| `autoSync.notifications` | `true` | Show notifications for problems |
 
 ## Status bar and notifications
 
@@ -52,7 +52,7 @@ The status bar item shows the current state:
 | `$(warning) N` | N repos need attention. Click to list them, and pick one to open a terminal in it |
 | `$(debug-pause)` | Paused |
 
-Hover for details, including repos on a local-only branch (nothing is pushed for those). The item is hidden when no repos are tracked. The `Auto Git` output channel logs every pull, push and change.
+Hover for details, including repos on a local-only branch (nothing is pushed for those). The item is hidden when no repos are tracked. The `Auto Sync` output channel logs every pull, push and change.
 
 Notifications only appear for things you need to act on: diverged branches, rejected pushes, authentication failures, and `merge.ff=false`. Each problem is reported once, and again only if it clears and comes back. Other problems, such as being offline, only show in the status bar.
 
@@ -62,7 +62,7 @@ Auto-sync relies on credentials you have already set up (SSH keys or a git crede
 
 ## Notes
 
-Auto Git only controls which repos it syncs. VS Code's own Git extension decides separately which repos appear in Source Control, through `git.autoRepositoryDetection` and `git.openRepositoryInParentFolders`. If a parent folder's repo shows up there, set `git.openRepositoryInParentFolders` to `never` or add the path to `git.ignoredRepositories`.
+Auto Sync only controls which repos it syncs. VS Code's own Git extension decides separately which repos appear in Source Control, through `git.autoRepositoryDetection` and `git.openRepositoryInParentFolders`. If a parent folder's repo shows up there, set `git.openRepositoryInParentFolders` to `never` or add the path to `git.ignoredRepositories`.
 
 ## License
 

@@ -5,8 +5,9 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { Services } from '../../../src/commands';
-import type { AutoGitExports } from '../../../src/extension';
+import type { AutoSyncExports } from '../../../src/extension';
 import type { RunSummary } from '../../../src/outcome';
+import { removeDir } from './removeDir';
 
 function git(cwd: string, ...args: string[]): string {
   return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -20,10 +21,10 @@ describe('commands', () => {
   let other: string;
 
   const setting = (key: string, value: unknown) =>
-    vscode.workspace.getConfiguration('autoGit').update(key, value, vscode.ConfigurationTarget.Workspace);
+    vscode.workspace.getConfiguration('autoSync').update(key, value, vscode.ConfigurationTarget.Workspace);
 
   before(async () => {
-    const ext = vscode.extensions.getExtension<AutoGitExports>('anthonygaliamov.auto-sync');
+    const ext = vscode.extensions.getExtension<AutoSyncExports>('anthonygaliamov.auto-sync');
     assert.ok(ext);
     const found = await (await ext.activate()).ready;
     assert.ok(found, 'services did not start');
@@ -50,11 +51,11 @@ describe('commands', () => {
   });
 
   afterEach(async () => {
-    await vscode.commands.executeCommand('autoGit.resume');
+    await vscode.commands.executeCommand('autoSync.resume');
     await setting('includeRepos', undefined);
     await setting('scanDepth', undefined);
     await services.discovery.refresh();
-    fs.rmSync(root, { recursive: true, force: true });
+    await removeDir(root);
   });
 
   function pushFromOther(file: string): void {
@@ -67,14 +68,14 @@ describe('commands', () => {
   it('registers every command', async () => {
     const commands = await vscode.commands.getCommands(true);
     for (const id of ['syncAll', 'syncRepository', 'pause', 'resume', 'showLog']) {
-      assert.ok(commands.includes(`autoGit.${id}`), id);
+      assert.ok(commands.includes(`autoSync.${id}`), id);
     }
   });
 
   it('syncAll tracks only the configured repo and pulls', async () => {
     pushFromOther('b.txt');
 
-    const summary = await vscode.commands.executeCommand<RunSummary>('autoGit.syncAll');
+    const summary = await vscode.commands.executeCommand<RunSummary>('autoSync.syncAll');
 
     assert.strictEqual(summary.total, 1);
     assert.strictEqual(summary.pulled, 1);
@@ -86,14 +87,14 @@ describe('commands', () => {
     git(local, 'add', 'c.txt');
     git(local, 'commit', '--quiet', '-m', 'add c');
 
-    const summary = await vscode.commands.executeCommand<RunSummary>('autoGit.syncAll');
+    const summary = await vscode.commands.executeCommand<RunSummary>('autoSync.syncAll');
 
     assert.strictEqual(summary.pushed, 1);
     assert.strictEqual(git(remote, 'rev-parse', 'refs/heads/main'), git(local, 'rev-parse', 'HEAD'));
   });
 
   it('remembers the latest outcome per repo', async () => {
-    await vscode.commands.executeCommand('autoGit.syncAll');
+    await vscode.commands.executeCommand('autoSync.syncAll');
 
     const outcome = [...services.service.results.entries()].find(([p]) => fs.realpathSync(p) === fs.realpathSync(local));
     assert.deepStrictEqual(outcome?.[1], { status: 'up-to-date' });
@@ -104,40 +105,40 @@ describe('commands', () => {
     pushFromOther('d.txt');
     const repository = services.discovery.getRepositories()[0];
 
-    const outcome = await vscode.commands.executeCommand<{ status: string }>('autoGit.syncRepository', repository);
+    const outcome = await vscode.commands.executeCommand<{ status: string }>('autoSync.syncRepository', repository);
 
     assert.strictEqual(outcome.status, 'pulled');
   });
 
   it('syncAll still works while paused, and resume clears the pause', async () => {
-    await vscode.commands.executeCommand('autoGit.pause');
+    await vscode.commands.executeCommand('autoSync.pause');
     assert.strictEqual(services.scheduler.paused, true);
     pushFromOther('e.txt');
 
-    const summary = await vscode.commands.executeCommand<RunSummary>('autoGit.syncAll');
+    const summary = await vscode.commands.executeCommand<RunSummary>('autoSync.syncAll');
 
     assert.strictEqual(summary.pulled, 1);
     assert.strictEqual(services.scheduler.paused, true);
 
-    await vscode.commands.executeCommand('autoGit.resume');
+    await vscode.commands.executeCommand('autoSync.resume');
     assert.strictEqual(services.scheduler.paused, false);
   });
 
   it('shares one run between overlapping syncAll calls', async () => {
     const [a, b] = await Promise.all([
-      vscode.commands.executeCommand<RunSummary>('autoGit.syncAll'),
-      vscode.commands.executeCommand<RunSummary>('autoGit.syncAll'),
+      vscode.commands.executeCommand<RunSummary>('autoSync.syncAll'),
+      vscode.commands.executeCommand<RunSummary>('autoSync.syncAll'),
     ]);
     assert.deepStrictEqual(a, b);
   });
 
-  it('skips repos opted out with autoGit.enabled', async () => {
+  it('skips repos opted out with autoSync.enabled', async () => {
     // Per-repo opt-out is read from the workspace folder containing the repo, here the whole fixture folder.
-    const config = vscode.workspace.getConfiguration('autoGit', vscode.Uri.file(local));
+    const config = vscode.workspace.getConfiguration('autoSync', vscode.Uri.file(local));
     await config.update('enabled', false, vscode.ConfigurationTarget.Workspace);
     try {
       await services.discovery.refresh();
-      const summary = await vscode.commands.executeCommand<RunSummary>('autoGit.syncAll');
+      const summary = await vscode.commands.executeCommand<RunSummary>('autoSync.syncAll');
       assert.strictEqual(summary.total, 0);
     } finally {
       await config.update('enabled', undefined, vscode.ConfigurationTarget.Workspace);

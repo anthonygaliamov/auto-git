@@ -2,7 +2,7 @@ import * as assert from 'node:assert';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { RepoDiscovery } from '../../../src/discovery';
-import type { AutoGitExports } from '../../../src/extension';
+import type { AutoSyncExports } from '../../../src/extension';
 import { realKey } from '../../../src/paths';
 
 const KEYS = ['scanDepth', 'includeRepos', 'excludeRepos'];
@@ -14,7 +14,7 @@ describe('repository discovery', () => {
   const repo = (rel: string): string => path.join(fixture, ...rel.split('/'));
 
   async function configure(values: Record<string, unknown>): Promise<string[]> {
-    const config = vscode.workspace.getConfiguration('autoGit');
+    const config = vscode.workspace.getConfiguration('autoSync');
     for (const key of KEYS) {
       await config.update(key, key in values ? values[key] : undefined, vscode.ConfigurationTarget.Workspace);
     }
@@ -27,10 +27,10 @@ describe('repository discovery', () => {
   }
 
   before(async () => {
-    const fromEnv = process.env.AUTO_GIT_FIXTURE;
-    assert.ok(fromEnv, 'AUTO_GIT_FIXTURE is not set');
+    const fromEnv = process.env.AUTO_SYNC_FIXTURE;
+    assert.ok(fromEnv, 'AUTO_SYNC_FIXTURE is not set');
     fixture = fromEnv;
-    const ext = vscode.extensions.getExtension<AutoGitExports>('anthonygaliamov.auto-sync');
+    const ext = vscode.extensions.getExtension<AutoSyncExports>('anthonygaliamov.auto-sync');
     assert.ok(ext);
     const exports = await ext.activate();
     const found = await exports.ready;
@@ -50,7 +50,7 @@ describe('repository discovery', () => {
   });
 
   it('never asks the Git extension to open a repo without a remote', async () => {
-    // VS Code's own repository detection may still open it. This checks only what Auto Git asks for.
+    // VS Code's own repository detection may still open it. This checks only what Auto Sync asks for.
     const api = (discovery as unknown as { api: { openRepository: (uri: vscode.Uri) => Promise<unknown> } }).api;
     const original = api.openRepository.bind(api);
     const asked: string[] = [];

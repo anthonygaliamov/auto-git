@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import type { API, Repository } from '../../../src/git';
 import { getGitApi } from '../../../src/gitApi';
 import { RepoSyncer } from '../../../src/syncRepo';
+import { removeDir } from './removeDir';
 
 function git(cwd: string, ...args: string[]): string {
   return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -54,8 +55,8 @@ describe('syncing a repository', () => {
     git(root, 'clone', '--quiet', remote, other);
   });
 
-  afterEach(() => {
-    fs.rmSync(root, { recursive: true, force: true });
+  afterEach(async () => {
+    await removeDir(root);
   });
 
   it('reports up to date when nothing changed', async () => {

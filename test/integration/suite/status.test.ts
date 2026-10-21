@@ -5,7 +5,8 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { Services } from '../../../src/commands';
-import type { AutoGitExports } from '../../../src/extension';
+import type { AutoSyncExports } from '../../../src/extension';
+import { removeDir } from './removeDir';
 
 function git(cwd: string, ...args: string[]): string {
   return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -21,7 +22,7 @@ describe('status bar and notifications', () => {
   const realWarning = vscode.window.showWarningMessage;
 
   const setting = (key: string, value: unknown) =>
-    vscode.workspace.getConfiguration('autoGit').update(key, value, vscode.ConfigurationTarget.Workspace);
+    vscode.workspace.getConfiguration('autoSync').update(key, value, vscode.ConfigurationTarget.Workspace);
 
   function commit(dir: string, file: string): void {
     fs.writeFileSync(path.join(dir, file), `${file}\n`);
@@ -40,7 +41,7 @@ describe('status bar and notifications', () => {
   }
 
   before(async () => {
-    const ext = vscode.extensions.getExtension<AutoGitExports>('anthonygaliamov.auto-sync');
+    const ext = vscode.extensions.getExtension<AutoSyncExports>('anthonygaliamov.auto-sync');
     assert.ok(ext);
     const found = await (await ext.activate()).ready;
     assert.ok(found, 'services did not start');
@@ -72,19 +73,19 @@ describe('status bar and notifications', () => {
 
   afterEach(async () => {
     (vscode.window as { showWarningMessage: unknown }).showWarningMessage = realWarning;
-    await vscode.commands.executeCommand('autoGit.resume');
+    await vscode.commands.executeCommand('autoSync.resume');
     await setting('includeRepos', undefined);
     await setting('scanDepth', undefined);
     await setting('notifications', undefined);
     await services.discovery.refresh();
     await services.service.syncAll(false);
-    fs.rmSync(root, { recursive: true, force: true });
+    await removeDir(root);
   });
 
   it('is idle when everything is in sync', async () => {
-    await vscode.commands.executeCommand('autoGit.syncAll');
+    await vscode.commands.executeCommand('autoSync.syncAll');
 
-    assert.strictEqual(services.status.text, '$(sync) Auto Git');
+    assert.strictEqual(services.status.text, '$(sync) Auto Sync');
     assert.deepStrictEqual(services.status.issues, []);
     assert.deepStrictEqual(warnings, []);
   });
@@ -92,30 +93,30 @@ describe('status bar and notifications', () => {
   it('shows a warning count for a diverged repo, and tells the user once', async () => {
     diverge();
 
-    await vscode.commands.executeCommand('autoGit.syncAll');
-    assert.strictEqual(services.status.text, '$(warning) Auto Git 1');
+    await vscode.commands.executeCommand('autoSync.syncAll');
+    assert.strictEqual(services.status.text, '$(warning) Auto Sync 1');
     assert.strictEqual(services.status.issues[0].kind, 'diverged');
     assert.strictEqual(warnings.length, 1);
     assert.ok(warnings[0].includes('local'), warnings[0]);
 
-    await vscode.commands.executeCommand('autoGit.syncAll');
-    await vscode.commands.executeCommand('autoGit.syncAll');
+    await vscode.commands.executeCommand('autoSync.syncAll');
+    await vscode.commands.executeCommand('autoSync.syncAll');
     assert.strictEqual(warnings.length, 1, 'the same problem must not be reported again');
   });
 
   it('clears the warning once fixed, and reports again if it comes back', async () => {
     diverge();
-    await vscode.commands.executeCommand('autoGit.syncAll');
+    await vscode.commands.executeCommand('autoSync.syncAll');
     assert.strictEqual(warnings.length, 1);
 
     heal();
-    await vscode.commands.executeCommand('autoGit.syncAll');
-    assert.strictEqual(services.status.text, '$(sync) Auto Git');
+    await vscode.commands.executeCommand('autoSync.syncAll');
+    assert.strictEqual(services.status.text, '$(sync) Auto Sync');
 
     commit(other, 'again.txt');
     git(other, 'push', '--quiet');
     commit(local, 'mine2.txt');
-    await vscode.commands.executeCommand('autoGit.syncAll');
+    await vscode.commands.executeCommand('autoSync.syncAll');
     assert.strictEqual(warnings.length, 2);
   });
 
@@ -123,37 +124,37 @@ describe('status bar and notifications', () => {
     await setting('notifications', false);
     diverge();
 
-    await vscode.commands.executeCommand('autoGit.syncAll');
+    await vscode.commands.executeCommand('autoSync.syncAll');
 
-    assert.strictEqual(services.status.text, '$(warning) Auto Git 1');
+    assert.strictEqual(services.status.text, '$(warning) Auto Sync 1');
     assert.deepStrictEqual(warnings, []);
   });
 
   it('does not notify for problems that are not worth a pop-up', async () => {
     git(local, 'remote', 'set-url', 'origin', path.join(root, 'gone.git'));
 
-    await vscode.commands.executeCommand('autoGit.syncAll');
+    await vscode.commands.executeCommand('autoSync.syncAll');
 
-    assert.strictEqual(services.status.text, '$(warning) Auto Git 1');
+    assert.strictEqual(services.status.text, '$(warning) Auto Sync 1');
     assert.strictEqual(services.status.issues[0].kind, 'network');
     assert.deepStrictEqual(warnings, []);
   });
 
   it('shows a paused icon, and goes back to idle on resume', async () => {
-    await vscode.commands.executeCommand('autoGit.syncAll');
-    await vscode.commands.executeCommand('autoGit.pause');
-    assert.strictEqual(services.status.text, '$(debug-pause) Auto Git');
+    await vscode.commands.executeCommand('autoSync.syncAll');
+    await vscode.commands.executeCommand('autoSync.pause');
+    assert.strictEqual(services.status.text, '$(debug-pause) Auto Sync');
 
-    await vscode.commands.executeCommand('autoGit.resume');
-    assert.notStrictEqual(services.status.text, '$(debug-pause) Auto Git');
+    await vscode.commands.executeCommand('autoSync.resume');
+    assert.notStrictEqual(services.status.text, '$(debug-pause) Auto Sync');
   });
 
   it('Show Issues says so when there is nothing to show', async () => {
-    await vscode.commands.executeCommand('autoGit.syncAll');
-    await vscode.commands.executeCommand('autoGit.showIssues');
+    await vscode.commands.executeCommand('autoSync.syncAll');
+    await vscode.commands.executeCommand('autoSync.showIssues');
   });
 
   it('registers Show Issues', async () => {
-    assert.ok((await vscode.commands.getCommands(true)).includes('autoGit.showIssues'));
+    assert.ok((await vscode.commands.getCommands(true)).includes('autoSync.showIssues'));
   });
 });

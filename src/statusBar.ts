@@ -15,13 +15,13 @@ import { readSettings } from './settings';
 import type { SyncService } from './syncService';
 
 export const UI_COMMANDS = {
-  showIssues: 'autoGit.showIssues',
-  showLog: 'autoGit.showLog',
+  showIssues: 'autoSync.showIssues',
+  showLog: 'autoSync.showLog',
 } as const;
 
 /** Keeps the status bar item and problem notifications in step with the sync results. */
 export class StatusController implements vscode.Disposable {
-  private readonly item = vscode.window.createStatusBarItem('autoGit.status', vscode.StatusBarAlignment.Left, 0);
+  private readonly item = vscode.window.createStatusBarItem('autoSync.status', vscode.StatusBarAlignment.Left, 0);
   private readonly tracker = new NotificationTracker();
   private readonly disposables: vscode.Disposable[] = [];
 
@@ -30,7 +30,7 @@ export class StatusController implements vscode.Disposable {
     private readonly service: SyncService,
     private readonly scheduler: Scheduler,
   ) {
-    this.item.name = 'Auto Git';
+    this.item.name = 'Auto Sync';
     this.disposables.push(
       this.item,
       service.onDidChange(() => this.refresh()),
@@ -100,7 +100,7 @@ export class StatusController implements vscode.Disposable {
   async showIssues(): Promise<void> {
     const issues = this.issues;
     if (issues.length === 0) {
-      void vscode.window.showInformationMessage('Auto Git: no repositories need attention.');
+      void vscode.window.showInformationMessage('Auto Sync: no repositories need attention.');
       return;
     }
     const picked = await vscode.window.showQuickPick(
@@ -113,7 +113,7 @@ export class StatusController implements vscode.Disposable {
       { placeHolder: 'Pick a repository to open a terminal in it' },
     );
     if (picked) {
-      vscode.window.createTerminal({ cwd: picked.issue.root, name: `Auto Git: ${repoName(picked.issue.root)}` }).show();
+      vscode.window.createTerminal({ cwd: picked.issue.root, name: `Auto Sync: ${repoName(picked.issue.root)}` }).show();
     }
   }
 

@@ -100,7 +100,7 @@ describe('buildStatus', () => {
   it('is idle with nothing to report, and opens the log when clicked', () => {
     const model = buildStatus(base);
     assert.strictEqual(model.state, 'idle');
-    assert.strictEqual(model.text, '$(sync) Auto Git');
+    assert.strictEqual(model.text, '$(sync) Auto Sync');
     assert.strictEqual(model.command, 'showLog');
     assert.strictEqual(model.visible, true);
   });
@@ -108,7 +108,7 @@ describe('buildStatus', () => {
   it('shows the issue count and opens the issues when clicked', () => {
     const model = buildStatus({ ...base, issues: [issue('a'), issue('b')] });
     assert.strictEqual(model.state, 'issues');
-    assert.strictEqual(model.text, '$(warning) Auto Git 2');
+    assert.strictEqual(model.text, '$(warning) Auto Sync 2');
     assert.strictEqual(model.command, 'showIssues');
     assert.ok(model.tooltip.includes('a: Diverged. m'));
   });
@@ -199,10 +199,10 @@ describe('NotificationTracker', () => {
 
 describe('describeNotification', () => {
   it('names the repo and problem for a single issue', () => {
-    assert.strictEqual(describeNotification([issue('a', { message: 'It diverged.' })]), 'Auto Git: a: It diverged.');
+    assert.strictEqual(describeNotification([issue('a', { message: 'It diverged.' })]), 'Auto Sync: a: It diverged.');
   });
 
   it('summarises several issues', () => {
-    assert.strictEqual(describeNotification([issue('a'), issue('b')]), 'Auto Git: 2 repositories need attention.');
+    assert.strictEqual(describeNotification([issue('a'), issue('b')]), 'Auto Sync: 2 repositories need attention.');
   });
 });

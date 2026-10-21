@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 import { runTests } from '@vscode/test-electron';
+import { removeDir } from './suite/removeDir';
 
 /**
  * Workspace with repos that have a remote at depth 0 (`a`), 1 (`nested/b`) and 4 (`nested/x/y/z/deep`),
@@ -36,22 +37,22 @@ async function main(): Promise<void> {
   const gitConfig = path.join(userDataDir, 'gitconfig');
   fs.writeFileSync(
     gitConfig,
-    '[init]\n\tdefaultBranch = main\n[user]\n\tname = Auto Git Test\n\temail = test@example.com\n',
+    '[init]\n\tdefaultBranch = main\n[user]\n\tname = Auto Sync Test\n\temail = test@example.com\n',
   );
   try {
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
       extensionTestsEnv: {
-        AUTO_GIT_FIXTURE: fixtureDir,
+        AUTO_SYNC_FIXTURE: fixtureDir,
         GIT_CONFIG_GLOBAL: gitConfig,
         GIT_CONFIG_NOSYSTEM: '1',
       },
       launchArgs: [fixtureDir, `--user-data-dir=${userDataDir}`],
     });
   } finally {
-    fs.rmSync(userDataDir, { recursive: true, force: true });
-    fs.rmSync(fixtureDir, { recursive: true, force: true });
+    await removeDir(userDataDir);
+    await removeDir(fixtureDir);
   }
 }
 

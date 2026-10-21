@@ -93,13 +93,13 @@ export function buildStatus(input: StatusInput): StatusModel {
   const state: StatusState = syncing ? 'syncing' : issues.length > 0 ? 'issues' : paused ? 'paused' : 'idle';
 
   const text = {
-    syncing: '$(sync~spin) Auto Git',
-    issues: `$(warning) Auto Git ${issues.length}`,
-    paused: '$(debug-pause) Auto Git',
-    idle: '$(sync) Auto Git',
+    syncing: '$(sync~spin) Auto Sync',
+    issues: `$(warning) Auto Sync ${issues.length}`,
+    paused: '$(debug-pause) Auto Sync',
+    idle: '$(sync) Auto Sync',
   }[state];
 
-  const lines = ['Auto Git'];
+  const lines = ['Auto Sync'];
   if (paused) {
     lines.push('Paused: automatic syncing is off.');
   }
@@ -154,7 +154,7 @@ export class NotificationTracker {
 
 export function describeNotification(fresh: readonly RepoIssue[]): string {
   if (fresh.length === 1) {
-    return `Auto Git: ${repoName(fresh[0].root)}: ${fresh[0].message}`;
+    return `Auto Sync: ${repoName(fresh[0].root)}: ${fresh[0].message}`;
   }
-  return `Auto Git: ${fresh.length} repositories need attention.`;
+  return `Auto Sync: ${fresh.length} repositories need attention.`;
 }

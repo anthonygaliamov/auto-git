@@ -16,7 +16,7 @@ function clamp(value: number, min: number, max: number, fallback: number): numbe
 }
 
 export function readSettings(): Settings {
-  const config = vscode.workspace.getConfiguration('autoGit');
+  const config = vscode.workspace.getConfiguration('autoSync');
   return {
     scanDepth: Math.floor(clamp(config.get<number>('scanDepth', 3), 0, 20, 3)),
     include: config.get<string[]>('includeRepos', []),
@@ -30,5 +30,5 @@ export function readSettings(): Settings {
 
 /** Per-repo opt-out, read through the workspace folder that contains the repo. */
 export function isEnabledFor(repoPath: string): boolean {
-  return vscode.workspace.getConfiguration('autoGit', vscode.Uri.file(repoPath)).get<boolean>('enabled', true);
+  return vscode.workspace.getConfiguration('autoSync', vscode.Uri.file(repoPath)).get<boolean>('enabled', true);
 }

@@ -16,12 +16,12 @@ export interface Services {
 }
 
 export const COMMANDS = {
-  syncAll: 'autoGit.syncAll',
-  syncRepository: 'autoGit.syncRepository',
-  pause: 'autoGit.pause',
-  resume: 'autoGit.resume',
-  showLog: 'autoGit.showLog',
-  showIssues: 'autoGit.showIssues',
+  syncAll: 'autoSync.syncAll',
+  syncRepository: 'autoSync.syncRepository',
+  pause: 'autoSync.pause',
+  resume: 'autoSync.resume',
+  showLog: 'autoSync.showLog',
+  showIssues: 'autoSync.showIssues',
 } as const;
 
 /**
@@ -36,7 +36,7 @@ export function registerCommands(
   async function services(): Promise<Services | undefined> {
     const s = await ready.catch(() => undefined);
     if (!s) {
-      void vscode.window.showWarningMessage('Auto Git is not running. The built-in Git extension is unavailable.');
+      void vscode.window.showWarningMessage('Auto Sync is not running. The built-in Git extension is unavailable.');
     }
     return s;
   }
@@ -48,10 +48,10 @@ export function registerCommands(
         return undefined;
       }
       const summary = await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Window, title: 'Auto Git: syncing' },
+        { location: vscode.ProgressLocation.Window, title: 'Auto Sync: syncing' },
         () => s.service.syncAll(true),
       );
-      void vscode.window.setStatusBarMessage(`Auto Git: ${describeSummary(summary)}`, 5000);
+      void vscode.window.setStatusBarMessage(`Auto Sync: ${describeSummary(summary)}`, 5000);
       return summary;
     }),
 
@@ -66,7 +66,7 @@ export function registerCommands(
       }
       const outcome = await s.service.syncOne(repository);
       void vscode.window.setStatusBarMessage(
-        `Auto Git: ${repository.rootUri.fsPath}: ${describeOutcome(outcome)}`,
+        `Auto Sync: ${repository.rootUri.fsPath}: ${describeOutcome(outcome)}`,
         5000,
       );
       return outcome;
@@ -105,7 +105,7 @@ export function registerCommands(
 async function pickRepository(discovery: RepoDiscovery, target: unknown): Promise<Repository | undefined> {
   const repositories = discovery.getRepositories();
   if (repositories.length === 0) {
-    void vscode.window.showInformationMessage('Auto Git: no repositories are being tracked.');
+    void vscode.window.showInformationMessage('Auto Sync: no repositories are being tracked.');
     return undefined;
   }
 

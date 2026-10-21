@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Renamed the remaining `autoGit.*` command and setting ids to `autoSync.*`, and the UI labels from "Auto Git" to "Auto Sync". Existing `autoGit.*` settings are no longer read.
+
 ## 0.1.1
 
 - Renamed the extension from `auto-git` to `auto-sync` because the name was taken on the Marketplace. The extension id is now `anthonygaliamov.auto-sync`.
