@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import type { Services } from '../../../src/commands';
 import type { AutoSyncExports } from '../../../src/extension';
 import type { RunSummary } from '../../../src/outcome';
+import { normalizePath } from '../../../src/paths';
 import { removeDir } from './removeDir';
 
 function git(cwd: string, ...args: string[]): string {
@@ -96,7 +97,9 @@ describe('commands', () => {
   it('remembers the latest outcome per repo', async () => {
     await vscode.commands.executeCommand('autoSync.syncAll');
 
-    const outcome = [...services.service.results.entries()].find(([p]) => fs.realpathSync(p) === fs.realpathSync(local));
+    // Use the native realpath so Windows 8.3 short names (RUNNER~1) expand to the same long path.
+    const key = (p: string): string => normalizePath(fs.realpathSync.native(p));
+    const outcome = [...services.service.results.entries()].find(([p]) => key(p) === key(local));
     assert.deepStrictEqual(outcome?.[1], { status: 'up-to-date' });
     assert.strictEqual(services.service.syncing, false);
   });
