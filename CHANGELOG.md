@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Renamed the extension from `auto-git` to `auto-sync` because the name was taken on the Marketplace. The extension id is now `anthonygaliamov.auto-sync`.
+
 ## 0.1.0
 
 - Repository discovery with scan depth, include and exclude lists.

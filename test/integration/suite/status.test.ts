@@ -40,7 +40,7 @@ describe('status bar and notifications', () => {
   }
 
   before(async () => {
-    const ext = vscode.extensions.getExtension<AutoGitExports>('anthonygaliamov.auto-git');
+    const ext = vscode.extensions.getExtension<AutoGitExports>('anthonygaliamov.auto-sync');
     assert.ok(ext);
     const found = await (await ext.activate()).ready;
     assert.ok(found, 'services did not start');

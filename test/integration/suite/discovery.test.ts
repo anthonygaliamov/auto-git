@@ -30,7 +30,7 @@ describe('repository discovery', () => {
     const fromEnv = process.env.AUTO_GIT_FIXTURE;
     assert.ok(fromEnv, 'AUTO_GIT_FIXTURE is not set');
     fixture = fromEnv;
-    const ext = vscode.extensions.getExtension<AutoGitExports>('anthonygaliamov.auto-git');
+    const ext = vscode.extensions.getExtension<AutoGitExports>('anthonygaliamov.auto-sync');
     assert.ok(ext);
     const exports = await ext.activate();
     const found = await exports.ready;

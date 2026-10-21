@@ -1,8 +1,8 @@
 {
-  "name": "auto-git",
+  "name": "auto-sync",
   "displayName": "Auto Git: Auto Fetch, Pull and Push",
   "description": "Periodically fetches, pulls and pushes your git repos.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "anthonygaliamov",
   "license": "MIT",
   "icon": "images/icon.png",

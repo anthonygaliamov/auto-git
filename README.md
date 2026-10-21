@@ -1,4 +1,4 @@
-# auto-git
+# auto-sync
 
 A VS Code extension that periodically syncs your local git repositories with their remotes. It fetches, fast-forward pulls, and pushes work you have already committed. It never commits, merges, rebases, force-pushes, or resolves conflicts. Anything it can't do safely is reported and left for you.
 
@@ -58,7 +58,7 @@ Notifications only appear for things you need to act on: diverged branches, reje
 
 ## Authentication
 
-Auto-git relies on credentials you have already set up (SSH keys or a git credential helper). It does not manage credentials.
+Auto-sync relies on credentials you have already set up (SSH keys or a git credential helper). It does not manage credentials.
 
 ## Notes
 
