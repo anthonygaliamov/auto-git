@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.0
 
 - Repository discovery with scan depth, include and exclude lists.
 - Fetch, fast-forward pull and push for the current branch, with safety checks.

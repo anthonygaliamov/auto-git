@@ -1,8 +1,8 @@
 {
   "name": "auto-git",
   "displayName": "Auto Git: Auto Fetch, Pull and Push",
-  "description": "Periodically fetches, fast-forward pulls and pushes your git repos. Never commits, merges or resolves conflicts.",
-  "version": "0.0.1",
+  "description": "Periodically fetches, pulls and pushes your git repos.",
+  "version": "0.1.0",
   "publisher": "anthonygaliamov",
   "license": "MIT",
   "icon": "images/icon.png",
