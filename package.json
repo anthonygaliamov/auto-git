@@ -32,6 +32,16 @@
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "Auto Git runs git fetch, pull and push, which can execute programs configured by the repository."
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Auto Git needs repositories on a local file system."
+    }
+  },
   "contributes": {
     "configuration": {
       "title": "Auto Git",

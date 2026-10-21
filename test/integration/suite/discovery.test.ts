@@ -1,0 +1,76 @@
+import * as assert from 'node:assert';
+import * as path from 'node:path';
+import * as vscode from 'vscode';
+import type { RepoDiscovery } from '../../../src/discovery';
+import type { AutoGitExports } from '../../../src/extension';
+import { realKey } from '../../../src/paths';
+
+const KEYS = ['scanDepth', 'includeRepos', 'excludeRepos'];
+
+describe('repository discovery', () => {
+  let discovery: RepoDiscovery;
+  let fixture: string;
+
+  const repo = (rel: string): string => path.join(fixture, ...rel.split('/'));
+
+  async function configure(values: Record<string, unknown>): Promise<string[]> {
+    const config = vscode.workspace.getConfiguration('autoGit');
+    for (const key of KEYS) {
+      await config.update(key, key in values ? values[key] : undefined, vscode.ConfigurationTarget.Workspace);
+    }
+    await discovery.refresh();
+    return Promise.all(discovery.getRepositories().map((r) => realKey(r.rootUri.fsPath))).then((keys) => keys.sort());
+  }
+
+  async function keys(...rels: string[]): Promise<string[]> {
+    return (await Promise.all(rels.map((rel) => realKey(repo(rel))))).sort();
+  }
+
+  before(async () => {
+    const fromEnv = process.env.AUTO_GIT_FIXTURE;
+    assert.ok(fromEnv, 'AUTO_GIT_FIXTURE is not set');
+    fixture = fromEnv;
+    const ext = vscode.extensions.getExtension<AutoGitExports>('anthonygaliamov.auto-git');
+    assert.ok(ext);
+    const exports = await ext.activate();
+    const found = await exports.ready;
+    assert.ok(found, 'discovery did not start');
+    discovery = found;
+  });
+
+  afterEach(() => configure({}));
+
+  it('finds repos within the default depth', async () => {
+    assert.deepStrictEqual(await configure({}), await keys('a', 'nested/b'));
+  });
+
+  it('finds deeper repos when scanDepth is raised', async () => {
+    assert.deepStrictEqual(await configure({ scanDepth: 5 }), await keys('a', 'nested/b', 'nested/x/y/z/deep'));
+  });
+
+  it('finds nothing at depth 0 when the workspace folder is not a repo', async () => {
+    assert.deepStrictEqual(await configure({ scanDepth: 0 }), []);
+  });
+
+  it('syncs only included repos', async () => {
+    assert.deepStrictEqual(await configure({ includeRepos: [repo('nested/b')] }), await keys('nested/b'));
+  });
+
+  it('includes repos outside the scan depth', async () => {
+    assert.deepStrictEqual(
+      await configure({ includeRepos: [repo('nested/x/y/z/deep')] }),
+      await keys('nested/x/y/z/deep'),
+    );
+  });
+
+  it('skips excluded repos', async () => {
+    assert.deepStrictEqual(await configure({ excludeRepos: [repo('a')] }), await keys('nested/b'));
+  });
+
+  it('lets exclude win over include', async () => {
+    assert.deepStrictEqual(
+      await configure({ includeRepos: [repo('a'), repo('nested/b')], excludeRepos: [repo('a')] }),
+      await keys('nested/b'),
+    );
+  });
+});
