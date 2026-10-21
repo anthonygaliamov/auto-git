@@ -127,6 +127,15 @@ describe('classifyError', () => {
     assert.strictEqual(classifyError(undefined, 'push', 'The requested URL returned error: 403'), 'auth');
   });
 
+  it('spots local changes in the way from the git output', () => {
+    const text = 'error: Your local changes to the following files would be overwritten by merge:\n\ta.txt';
+    assert.strictEqual(classifyError(undefined, 'pull', text), 'local-changes');
+    assert.strictEqual(
+      classifyError(undefined, 'pull', 'error: The following untracked working tree files would be overwritten by merge:'),
+      'local-changes',
+    );
+  });
+
   it('does not mistake file permission errors for auth failures', () => {
     assert.strictEqual(classifyError(undefined, 'fetch', 'error: cannot open .git/FETCH_HEAD: Permission denied'), 'error');
   });

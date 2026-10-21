@@ -13,7 +13,7 @@ import type { Logger } from './log';
 import { summarizeError, type SyncOutcome, type SyncPhase } from './outcome';
 
 /**
- * Syncs one repository at a time: fetch the current branch, then pull if strictly behind
+ * Syncs one repository at a time: fetch the current branch, then fast-forward if strictly behind
  * or push if strictly ahead. It never forces, merges, rebases on its own or sets an upstream.
  */
 export class RepoSyncer {
@@ -71,7 +71,10 @@ export class RepoSyncer {
         return { status: 'blocked', reason: action.reason, issue: BLOCKED_ISSUES[action.reason] };
       case 'pull':
         try {
-          await repository.pull();
+          // Merging the branch we just fetched is a fast-forward here, because we are strictly behind.
+          // Unlike repository.pull(), it never fetches tags or shows the "replace local tags?" dialog,
+          // which VS Code's pull can raise from a background sync.
+          await repository.merge(`refs/remotes/${upstream.remote}/${upstream.name}`);
         } catch (err) {
           return failed('pull', err);
         }

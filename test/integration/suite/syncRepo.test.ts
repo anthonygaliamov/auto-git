@@ -214,6 +214,35 @@ describe('syncing a repository', () => {
     assert.strictEqual(outcome.status === 'failed' && outcome.phase, 'push');
   });
 
+  it('never shows a dialog or touches local tags when a remote tag conflicts', async () => {
+    git(local, 'tag', 'v1');
+    git(local, 'push', '--quiet', 'origin', 'v1');
+    git(other, 'pull', '--quiet');
+    git(other, 'tag', '-f', 'v1', 'HEAD~1');
+    commit(other, 'c.txt', 'new\n');
+    git(other, 'push', '--quiet', '--force', 'origin', 'v1');
+    git(other, 'push', '--quiet');
+    const localTag = git(local, 'rev-parse', 'v1');
+
+    const shown: string[] = [];
+    const real = vscode.window.showErrorMessage;
+    (vscode.window as { showErrorMessage: unknown }).showErrorMessage = (message: string) => {
+      shown.push(message);
+      return Promise.resolve(undefined);
+    };
+    let outcome;
+    try {
+      outcome = await syncer.sync(await open(local));
+    } finally {
+      (vscode.window as { showErrorMessage: unknown }).showErrorMessage = real;
+    }
+
+    assert.deepStrictEqual(shown, [], 'a dialog was shown');
+    assert.strictEqual(git(local, 'rev-parse', 'v1'), localTag, 'the local tag changed');
+    assert.deepStrictEqual(outcome, { status: 'pulled', commits: 1 });
+    assert.ok(fs.existsSync(path.join(local, 'c.txt')));
+  });
+
   it('runs one sync per repository at a time', async () => {
     const repository = await open(local);
     const [first, second] = await Promise.all([syncer.sync(repository), syncer.sync(repository)]);

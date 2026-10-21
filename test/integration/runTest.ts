@@ -4,12 +4,22 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { runTests } from '@vscode/test-electron';
 
-/** Workspace with repos at depth 0 (`a`), 1 (`nested/b`) and 4 (`nested/x/y/z/deep`). */
+/**
+ * Workspace with repos that have a remote at depth 0 (`a`), 1 (`nested/b`) and 4 (`nested/x/y/z/deep`),
+ * plus `local-only`, a repo with no remote and many untracked files, which must never be tracked.
+ */
 function createFixture(root: string): void {
   for (const rel of ['a', 'nested/b', 'nested/x/y/z/deep']) {
     const dir = path.join(root, rel);
     fs.mkdirSync(dir, { recursive: true });
     execFileSync('git', ['init', '--quiet'], { cwd: dir });
+    execFileSync('git', ['remote', 'add', 'origin', path.join(root, 'remote.git')], { cwd: dir });
+  }
+  const localOnly = path.join(root, 'local-only');
+  fs.mkdirSync(localOnly);
+  execFileSync('git', ['init', '--quiet'], { cwd: localOnly });
+  for (let i = 0; i < 200; i++) {
+    fs.writeFileSync(path.join(localOnly, `file${i}.txt`), 'x\n');
   }
 }
 

@@ -40,6 +40,34 @@ describe('repository discovery', () => {
 
   afterEach(() => configure({}));
 
+  it('never tracks a repo without a remote', async () => {
+    const tracked = await configure({ scanDepth: 5 });
+    assert.ok(!tracked.includes(await realKey(repo('local-only'))));
+  });
+
+  it('never tracks a repo without a remote, even when included by path', async () => {
+    assert.deepStrictEqual(await configure({ includeRepos: [repo('local-only')] }), []);
+  });
+
+  it('never asks the Git extension to open a repo without a remote', async () => {
+    // VS Code's own repository detection may still open it. This checks only what Auto Git asks for.
+    const api = (discovery as unknown as { api: { openRepository: (uri: vscode.Uri) => Promise<unknown> } }).api;
+    const original = api.openRepository.bind(api);
+    const asked: string[] = [];
+    api.openRepository = (uri) => {
+      asked.push(uri.fsPath);
+      return original(uri);
+    };
+    try {
+      await configure({ scanDepth: 5, includeRepos: [repo('local-only')] });
+    } finally {
+      api.openRepository = original;
+    }
+    assert.ok(asked.length > 0, 'the spy saw no calls');
+    const keys = await Promise.all(asked.map(realKey));
+    assert.ok(!keys.includes(await realKey(repo('local-only'))), 'local-only was opened');
+  });
+
   it('finds repos within the default depth', async () => {
     assert.deepStrictEqual(await configure({}), await keys('a', 'nested/b'));
   });

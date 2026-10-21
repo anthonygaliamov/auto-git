@@ -10,5 +10,7 @@ esbuild.js
 eslint.config.mjs
 tsconfig*.json
 **/*.map
+images/icon.svg
+package-lock.json
 .gitignore
 *.vsix

@@ -5,10 +5,19 @@
   "version": "0.0.1",
   "publisher": "anthonygaliamov",
   "license": "MIT",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#1f2937",
+    "theme": "dark"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/anthonygaliamov/auto-git.git"
   },
+  "bugs": {
+    "url": "https://github.com/anthonygaliamov/auto-git/issues"
+  },
+  "homepage": "https://github.com/anthonygaliamov/auto-git#readme",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -18,9 +27,11 @@
   "keywords": [
     "git",
     "sync",
-    "fetch",
-    "pull",
-    "push"
+    "auto fetch",
+    "auto pull",
+    "auto push",
+    "fast-forward",
+    "repositories"
   ],
   "extensionKind": [
     "workspace"
@@ -150,10 +161,10 @@
     "@types/node": "^22.20.0",
     "@types/vscode": "^1.90.0",
     "@vscode/test-electron": "^3.1.0",
-    "@vscode/vsce": "^3.7.0",
+    "@vscode/vsce": "^4.0.0",
     "esbuild": "^0.25.0",
     "eslint": "^9.39.0",
-    "mocha": "^11.7.0",
+    "mocha": "^12.0.3",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.0"
   }

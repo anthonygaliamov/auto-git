@@ -3,6 +3,7 @@ import type { API, Repository } from './git';
 import type { Logger } from './log';
 import { realKey } from './paths';
 import { invalidEntries, isSelected } from './repoFilter';
+import { readRemotes } from './remotes';
 import { findRepos } from './scan';
 import { isEnabledFor, readSettings } from './settings';
 
@@ -14,6 +15,7 @@ export class RepoDiscovery implements vscode.Disposable {
   private readonly disposables: vscode.Disposable[] = [];
   private readonly changed = new vscode.EventEmitter<readonly Repository[]>();
   private repositories: Repository[] = [];
+  private readonly noRemoteLogged = new Set<string>();
   private running: Promise<void> | undefined;
   private rerun = false;
 
@@ -90,6 +92,15 @@ export class RepoDiscovery implements vscode.Disposable {
       if (!isSelected(repoPath, settings) || !isEnabledFor(repoPath)) {
         continue;
       }
+      // Checked before opening: opening a repo adds it to the Source Control view, with all its changes.
+      if ((await readRemotes(repoPath)).length === 0) {
+        if (!this.noRemoteLogged.has(key)) {
+          this.noRemoteLogged.add(key);
+          this.log.info(`Ignoring ${repoPath}: it has no remote.`);
+        }
+        continue;
+      }
+      this.noRemoteLogged.delete(key);
       const repository = await this.api.openRepository(vscode.Uri.file(repoPath));
       if (!repository) {
         this.log.info(`Could not open ${repoPath} as a git repository.`);

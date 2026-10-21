@@ -87,6 +87,8 @@ export const BLOCKED_ISSUES: Record<BlockedReason, { kind: IssueKind; message: s
   },
 };
 
+const LOCAL_CHANGES_TEXT = /local changes to the following files would be overwritten|untracked working tree files would be overwritten/i;
+
 const AUTH_TEXT =
   /authentication failed|permission denied \(|could not read (username|password)|terminal prompts disabled|invalid credentials|returned error: 40[13]/i;
 
@@ -97,6 +99,9 @@ const AUTH_TEXT =
 export function classifyError(code: string | undefined, phase: 'fetch' | 'pull' | 'push', text = ''): IssueKind {
   if (AUTH_TEXT.test(text)) {
     return 'auth';
+  }
+  if (LOCAL_CHANGES_TEXT.test(text)) {
+    return 'local-changes';
   }
   switch (code) {
     case 'AuthenticationFailed':
