@@ -22,11 +22,21 @@ async function main(): Promise<void> {
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ag-'));
   const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'agf-'));
   createFixture(fixtureDir);
+  // Isolate git from the machine's own settings (pull.rebase, merge.ff and so on).
+  const gitConfig = path.join(userDataDir, 'gitconfig');
+  fs.writeFileSync(
+    gitConfig,
+    '[init]\n\tdefaultBranch = main\n[user]\n\tname = Auto Git Test\n\temail = test@example.com\n',
+  );
   try {
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
-      extensionTestsEnv: { AUTO_GIT_FIXTURE: fixtureDir },
+      extensionTestsEnv: {
+        AUTO_GIT_FIXTURE: fixtureDir,
+        GIT_CONFIG_GLOBAL: gitConfig,
+        GIT_CONFIG_NOSYSTEM: '1',
+      },
       launchArgs: [fixtureDir, `--user-data-dir=${userDataDir}`],
     });
   } finally {
