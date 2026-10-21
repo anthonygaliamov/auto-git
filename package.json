@@ -1,0 +1,116 @@
+{
+  "name": "auto-git",
+  "displayName": "Auto Git: Auto Fetch, Pull and Push",
+  "description": "Periodically fetches, fast-forward pulls and pushes your git repos. Never commits, merges or resolves conflicts.",
+  "version": "0.0.1",
+  "publisher": "anthonygaliamov",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anthonygaliamov/auto-git.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "SCM Providers"
+  ],
+  "keywords": [
+    "git",
+    "sync",
+    "fetch",
+    "pull",
+    "push"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Auto Git",
+      "properties": {
+        "autoGit.enabled": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Sync repositories automatically. Set it to false in a repo folder's settings to opt that repo out."
+        },
+        "autoGit.intervalMinutes": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "description": "Minutes between syncs."
+        },
+        "autoGit.scanDepth": {
+          "type": "number",
+          "default": 3,
+          "minimum": 0,
+          "description": "How many folder levels to search inside each workspace folder for nested repositories."
+        },
+        "autoGit.includeRepos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Absolute repository paths. If not empty, only these repositories are synced."
+        },
+        "autoGit.excludeRepos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Absolute repository paths that are never synced. Takes priority over includeRepos."
+        },
+        "autoGit.syncOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sync shortly after VS Code starts."
+        },
+        "autoGit.syncOnFocus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Sync when the window regains focus and the last sync is older than the interval."
+        },
+        "autoGit.notifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications for problems that need attention."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run typecheck && node esbuild.js",
+    "package": "npm run typecheck && node esbuild.js --production",
+    "watch": "node esbuild.js --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test",
+    "build:tests": "tsc -p tsconfig.test.json",
+    "test:unit": "npm run build:tests && mocha \"out/test/unit/**/*.test.js\"",
+    "test:integration": "npm run compile && npm run build:tests && node out/test/integration/runTest.js",
+    "test": "npm run test:unit && npm run test:integration"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.20.0",
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^3.7.0",
+    "esbuild": "^0.25.0",
+    "eslint": "^9.39.0",
+    "mocha": "^11.7.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.0"
+  }
+}
