@@ -15,3 +15,17 @@ export async function realKey(p: string): Promise<string> {
     return normalizePath(p);
   }
 }
+
+/** The longest entry of `roots` that contains `file`, or undefined. */
+export function containingRoot(roots: readonly string[], file: string): string | undefined {
+  const target = normalizePath(file);
+  let best: { root: string; length: number } | undefined;
+  for (const root of roots) {
+    const key = normalizePath(root);
+    const prefix = key.endsWith(path.sep) ? key : key + path.sep;
+    if ((target === key || target.startsWith(prefix)) && (!best || key.length > best.length)) {
+      best = { root, length: key.length };
+    }
+  }
+  return best?.root;
+}

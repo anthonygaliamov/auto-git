@@ -35,7 +35,7 @@ describe('repository discovery', () => {
     const exports = await ext.activate();
     const found = await exports.ready;
     assert.ok(found, 'discovery did not start');
-    discovery = found;
+    discovery = found.discovery;
   });
 
   afterEach(() => configure({}));

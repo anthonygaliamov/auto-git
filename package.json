@@ -43,6 +43,35 @@
     }
   },
   "contributes": {
+    "commands": [
+      {
+        "command": "autoGit.syncAll",
+        "title": "Sync All Repositories Now",
+        "category": "Auto Git"
+      },
+      {
+        "command": "autoGit.syncRepository",
+        "title": "Sync This Repository",
+        "category": "Auto Git"
+      },
+      {
+        "command": "autoGit.pause",
+        "title": "Pause",
+        "category": "Auto Git",
+        "enablement": "!autoGit.paused"
+      },
+      {
+        "command": "autoGit.resume",
+        "title": "Resume",
+        "category": "Auto Git",
+        "enablement": "autoGit.paused"
+      },
+      {
+        "command": "autoGit.showLog",
+        "title": "Show Log",
+        "category": "Auto Git"
+      }
+    ],
     "configuration": {
       "title": "Auto Git",
       "properties": {
