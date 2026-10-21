@@ -5,6 +5,7 @@ import { getGitApi } from './gitApi';
 import { Logger } from './log';
 import { Scheduler } from './scheduler';
 import { readSettings } from './settings';
+import { StatusController } from './statusBar';
 import { SyncService } from './syncService';
 import { RepoSyncer } from './syncRepo';
 
@@ -45,10 +46,12 @@ async function start(context: vscode.ExtensionContext, log: Logger): Promise<Ser
     intervalMs: () => readSettings().intervalMinutes * 60_000,
     onError: (err) => log.info(`Sync failed: ${err instanceof Error ? err.message : String(err)}`),
   });
+  const status = new StatusController(discovery, service, scheduler);
   context.subscriptions.push(
     discovery,
     service,
     scheduler,
+    status,
     vscode.window.onDidChangeWindowState((state) => {
       if (state.focused && readSettings().syncOnFocus) {
         scheduler.focus();
@@ -66,7 +69,7 @@ async function start(context: vscode.ExtensionContext, log: Logger): Promise<Ser
   scheduler.start(syncOnStartup ? STARTUP_DELAY_MS : intervalMinutes * 60_000);
   log.info(`Auto Git started. Syncing every ${intervalMinutes} minute${intervalMinutes === 1 ? '' : 's'}.`);
 
-  return { discovery, service, scheduler };
+  return { discovery, service, scheduler, status };
 }
 
 export function deactivate(): void {}

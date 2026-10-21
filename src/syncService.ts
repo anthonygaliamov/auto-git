@@ -14,6 +14,7 @@ export class SyncService implements vscode.Disposable {
   private readonly outcomes = new Map<string, SyncOutcome>();
   private current: Promise<RunSummary> | undefined;
   private active = 0;
+  private lastSync: Date | undefined;
 
   readonly onDidChange = this.changed.event;
 
@@ -25,6 +26,11 @@ export class SyncService implements vscode.Disposable {
 
   get syncing(): boolean {
     return this.current !== undefined || this.active > 0;
+  }
+
+  /** When the last full run finished. */
+  get lastSyncAt(): Date | undefined {
+    return this.lastSync;
   }
 
   /** Latest outcome per repository root path. */
@@ -61,6 +67,7 @@ export class SyncService implements vscode.Disposable {
 
     const outcomes = await mapLimit(repositories, MAX_PARALLEL, (r) => this.syncRepository(r, manual));
     const summary = summarizeRun(outcomes);
+    this.lastSync = new Date();
     if (manual) {
       this.log.info(describeSummary(summary));
     }

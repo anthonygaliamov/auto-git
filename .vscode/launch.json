@@ -8,6 +8,14 @@
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "preLaunchTask": "npm: watch"
+    },
+    {
+      "name": "Run Extension on the Personal folder (real repos)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}", "${workspaceFolder}/.."],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "preLaunchTask": "npm: watch"
     }
   ]
 }

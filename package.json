@@ -70,6 +70,11 @@
         "command": "autoGit.showLog",
         "title": "Show Log",
         "category": "Auto Git"
+      },
+      {
+        "command": "autoGit.showIssues",
+        "title": "Show Issues",
+        "category": "Auto Git"
       }
     ],
     "configuration": {

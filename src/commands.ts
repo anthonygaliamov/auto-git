@@ -5,12 +5,14 @@ import type { Logger } from './log';
 import { containingRoot } from './paths';
 import { describeOutcome, describeSummary, type RunSummary } from './outcome';
 import type { Scheduler } from './scheduler';
+import type { StatusController } from './statusBar';
 import type { SyncService } from './syncService';
 
 export interface Services {
   discovery: RepoDiscovery;
   service: SyncService;
   scheduler: Scheduler;
+  status: StatusController;
 }
 
 export const COMMANDS = {
@@ -19,6 +21,7 @@ export const COMMANDS = {
   pause: 'autoGit.pause',
   resume: 'autoGit.resume',
   showLog: 'autoGit.showLog',
+  showIssues: 'autoGit.showIssues',
 } as const;
 
 /**
@@ -75,6 +78,7 @@ export function registerCommands(
         s.scheduler.pause();
         log.info('Paused. Automatic syncing is off until resumed.');
         onPausedChange(true);
+        s.status.refresh();
       }
     }),
 
@@ -84,10 +88,16 @@ export function registerCommands(
         s.scheduler.resume();
         log.info('Resumed.');
         onPausedChange(false);
+        s.status.refresh();
       }
     }),
 
     vscode.commands.registerCommand(COMMANDS.showLog, () => log.show()),
+
+    vscode.commands.registerCommand(COMMANDS.showIssues, async () => {
+      const s = await services();
+      await s?.status.showIssues();
+    }),
   );
 }
 
