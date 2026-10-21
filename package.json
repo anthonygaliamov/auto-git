@@ -2,7 +2,7 @@
   "name": "auto-sync",
   "displayName": "Auto Sync",
   "description": "Periodically fetches, pulls and pushes your git repos.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "publisher": "anthonygaliamov",
   "license": "MIT",
   "icon": "images/icon.png",

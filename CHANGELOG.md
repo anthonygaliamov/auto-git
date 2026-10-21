@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 
+- Log timestamps are now in local time (with UTC offset) instead of UTC.
+- Every sync run, including scheduled ones, now logs a one-line summary such as `Checked 5 repositories: 5 up to date.`
 - Renamed the remaining `autoGit.*` command and setting ids to `autoSync.*`, and the UI labels from "Auto Git" to "Auto Sync". Existing `autoGit.*` settings are no longer read.
 
 ## 0.1.1
