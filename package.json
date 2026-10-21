@@ -1,6 +1,6 @@
 {
   "name": "auto-sync",
-  "displayName": "Auto Git: Auto Fetch, Pull and Push",
+  "displayName": "Auto Sync",
   "description": "Periodically fetches, pulls and pushes your git repos.",
   "version": "0.1.1",
   "publisher": "anthonygaliamov",
